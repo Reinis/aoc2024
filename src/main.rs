@@ -99,5 +99,12 @@ fn part1(filename: String) {
 }
 
 fn part2(filename: String) {
-    todo!()
+    let (first, second) = extract(filename);
+    let terms: Vec<usize> = first
+        .iter()
+        .map(|x| *x as usize * second.iter().filter(|y| *y == x).count())
+        .collect();
+    // dbg!(&terms);
+    let result: usize = terms.iter().sum();
+    dbg!(result);
 }
