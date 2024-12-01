@@ -9,6 +9,8 @@ struct Args {
     day: Option<u8>,
     #[arg(short, long)]
     example: Option<u8>,
+    #[arg(short, long)]
+    part: Option<u8>,
 }
 
 fn main() {
@@ -30,16 +32,39 @@ fn run(day: u8, args: Args) {
 
 fn day01(args: Args) {
     if let Some(number) = args.example {
-        example(1, number)
+        if let Some(part) = args.part {
+            example(1, part, number);
+        } else {
+            example(1, 1, number);
+            example(1, 2, number);
+        }
+    } else if let Some(part) = args.part {
+        input(1, part)
+    } else {
+        input(1, 1);
+        input(1, 2);
     }
 }
 
-fn example(day: u8, number: u8) {
+fn example(day: u8, part: u8, number: u8) {
     let filename = format!("data/{day:02}/example{number}");
-    part1(filename);
+    if part == 1 {
+        part1(filename);
+    } else {
+        part2(filename);
+    }
 }
 
-fn part1(filename: String) {
+fn input(day: u8, part: u8) {
+    let filename = format!("data/{day:02}/input");
+    if part == 1 {
+        part1(filename);
+    } else {
+        part2(filename);
+    }
+}
+
+fn extract(filename: String) -> (Vec<i64>, Vec<i64>) {
     let contents =
         std::fs::read_to_string(dbg!(filename)).expect("should have been able to read the file");
     // println!("{contents}");
@@ -58,6 +83,11 @@ fn part1(filename: String) {
     }
     // dbg!(&first);
     // dbg!(&second);
+    (first, second)
+}
+
+fn part1(filename: String) {
+    let (mut first, mut second) = extract(filename);
     first.sort();
     second.sort();
     // dbg!(&first);
@@ -66,4 +96,8 @@ fn part1(filename: String) {
     // dbg!(&terms);
     let result: i64 = terms.iter().sum();
     dbg!(result);
+}
+
+fn part2(filename: String) {
+    todo!()
 }
