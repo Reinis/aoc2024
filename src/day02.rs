@@ -4,6 +4,7 @@ pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
     match args.part {
         1 => part1(filename),
+        2 => part2(filename),
         _ => todo!(),
     }
 }
@@ -28,8 +29,8 @@ fn part1(filename: String) -> usize {
 
 fn is_safe(report: &[i8]) -> bool {
     let mut diff = 0;
-    for (a, b) in report[..report.len() - 1].iter().zip(report[1..].iter()) {
-        let d = b - a;
+    for w in report.windows(2) {
+        let d = w[1] - w[0];
         if d.abs() < 1 || d.abs() > 3 {
             return false;
         }
@@ -42,4 +43,51 @@ fn is_safe(report: &[i8]) -> bool {
         }
     }
     true
+}
+
+fn part2(filename: String) -> usize {
+    let reports = read(filename);
+    let safe = reports.iter().filter(|x| is_tolerable(x)).count();
+    dbg!(safe);
+    safe
+}
+
+fn is_tolerable(report: &[i8]) -> bool {
+    if is_safe(report) {
+        return true;
+    }
+    let v = Vec::from(report);
+    for i in 0..report.len() {
+        let mut w = v.clone();
+        w.remove(i);
+        if is_safe(w.as_ref()) {
+            return true;
+        }
+    }
+    false
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn p1e1() {
+        let args = Args {
+            day: 2,
+            part: 1,
+            example: Some(1),
+        };
+        assert_eq!(run(args), 2);
+    }
+
+    #[test]
+    fn p2e1() {
+        let args = Args {
+            day: 2,
+            part: 2,
+            example: Some(1),
+        };
+        assert_eq!(run(args), 4);
+    }
 }
