@@ -5,8 +5,8 @@ mod day01;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about=None)]
 struct Args {
-    #[arg(short, long)]
-    day: Option<u8>,
+    #[arg(short, long, default_value_t = 1)]
+    day: u8,
     #[arg(short, long)]
     example: Option<u8>,
     #[arg(short, long, default_value_t = 1)]
@@ -15,13 +15,13 @@ struct Args {
 
 impl Args {
     fn example_filename(self: &Args) -> String {
-        let Some(day) = self.day else { todo!() };
+        let day = self.day;
         let Some(number) = self.example else { todo!() };
         format!("data/{day:02}/example{number}")
     }
 
     fn input_filename(self: &Args) -> String {
-        let Some(day) = self.day else { todo!() };
+        let day = self.day;
         format!("data/{day:02}/input")
     }
 
@@ -36,9 +36,8 @@ impl Args {
 
 fn main() {
     let args = Args::parse();
-    let Some(day) = args.day else { todo!() };
 
-    match day {
+    match args.day {
         1 => day01::run(args),
         _ => todo!(),
     };

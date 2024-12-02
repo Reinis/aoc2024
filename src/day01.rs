@@ -63,7 +63,7 @@ mod tests {
     #[test]
     fn p1e1() {
         let args = Args {
-            day: Some(1),
+            day: 1,
             part: 1,
             example: Some(1),
         };
@@ -74,7 +74,7 @@ mod tests {
     #[test]
     fn p2e1() {
         let args = Args {
-            day: Some(1),
+            day: 1,
             part: 2,
             example: Some(1),
         };
