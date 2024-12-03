@@ -44,3 +44,18 @@ fn main() {
         _ => todo!(),
     };
 }
+
+#[macro_export]
+macro_rules! test {
+    ($func:ident, $day:expr, $part:expr, $example:expr, $expected:expr) => {
+        #[test]
+        fn $func() {
+            let args = $crate::Args {
+                day: $day,
+                part: $part,
+                example: Some($example),
+            };
+            assert_eq!(super::run(args), $expected);
+        }
+    };
+}

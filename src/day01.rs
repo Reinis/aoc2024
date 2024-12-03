@@ -58,27 +58,8 @@ fn part2(filename: String) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::test;
 
-    #[test]
-    fn p1e1() {
-        let args = Args {
-            day: 1,
-            part: 1,
-            example: Some(1),
-        };
-        let result = run(args);
-        assert_eq!(result, 11);
-    }
-
-    #[test]
-    fn p2e1() {
-        let args = Args {
-            day: 1,
-            part: 2,
-            example: Some(1),
-        };
-        let result = run(args);
-        assert_eq!(result, 31);
-    }
+    test!(p1, 1, 1, 1, 11);
+    test!(p2, 1, 2, 1, 31);
 }

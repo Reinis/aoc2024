@@ -69,25 +69,8 @@ fn is_tolerable(report: &[i8]) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::test;
 
-    #[test]
-    fn p1e1() {
-        let args = Args {
-            day: 2,
-            part: 1,
-            example: Some(1),
-        };
-        assert_eq!(run(args), 2);
-    }
-
-    #[test]
-    fn p2e1() {
-        let args = Args {
-            day: 2,
-            part: 2,
-            example: Some(1),
-        };
-        assert_eq!(run(args), 4);
-    }
+    test!(p1, 2, 1, 1, 2);
+    test!(p2, 2, 2, 1, 4);
 }
