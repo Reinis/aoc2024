@@ -4,6 +4,7 @@ pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
     match args.part {
         1 => part1(filename),
+        2 => part2(filename),
         _ => todo!(),
     }
 }
@@ -133,9 +134,45 @@ fn count_words(word: &[char]) -> impl FnMut(&Vec<char>) -> usize {
     }
 }
 
+fn part2(filename: String) -> usize {
+    let board = read(filename);
+    let len = board.len();
+    let count = (1..len - 1)
+        .map(|row| {
+            (1..len - 1)
+                .map(|col| {
+                    if board[row][col] != 'A' {
+                        return 0;
+                    }
+                    let a = board[row - 1][col - 1];
+                    let b = board[row + 1][col + 1];
+                    let c = board[row - 1][col + 1];
+                    let d = board[row + 1][col - 1];
+                    let list = [a, b, c, d];
+                    if list.iter().filter(|x| **x == 'M').count() != 2
+                        || list.iter().filter(|x| **x == 'S').count() != 2
+                    {
+                        return 0;
+                    }
+                    if a == b || c == d {
+                        return 0;
+                    }
+                    if DEBUG {
+                        eprintln!("({row},{col})");
+                    }
+                    1
+                })
+                .sum::<usize>()
+        })
+        .sum();
+    dbg!(count);
+    count
+}
+
 #[cfg(test)]
 mod tests {
     use crate::test;
 
     test!(p1, 4, 1, 1, 18);
+    test!(p2, 4, 2, 1, 9);
 }
