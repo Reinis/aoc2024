@@ -1,9 +1,12 @@
+use std::cmp::Ordering;
+
 use super::Args;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
     match args.part {
         1 => part1(filename),
+        2 => part2(filename),
         _ => todo!(),
     }
 }
@@ -81,9 +84,39 @@ fn debug_update(update: &Vec<usize>) {
     }
 }
 
+fn part2(filename: String) -> usize {
+    let (rules, updates) = read(filename);
+    let count = updates
+        .iter()
+        .filter(|update| !is_ordered(update, &rules))
+        .inspect(|x| debug_update(x))
+        .map(|update| order(update, &rules))
+        .inspect(debug_update)
+        .map(|update| get_mid(&update))
+        .inspect(debug_page)
+        .sum();
+    dbg!(count);
+    count
+}
+
+fn order(update: &[usize], rules: &[(usize, usize)]) -> Vec<usize> {
+    let mut result = update.to_vec();
+    result.sort_by(|&x, &y| {
+        if rules.contains(&(x, y)) {
+            return Ordering::Less;
+        }
+        if rules.contains(&(y, x)) {
+            return Ordering::Greater;
+        }
+        Ordering::Equal
+    });
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use crate::test;
 
     test!(p1, 5, 1, 1, 143);
+    test!(p2, 5, 2, 1, 123);
 }
