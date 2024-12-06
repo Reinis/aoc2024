@@ -1,9 +1,12 @@
+use std::collections::HashMap;
+
 use super::Args;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
     match args.part {
         1 => part1(filename),
+        2 => part2(filename),
         _ => todo!(),
     }
 }
@@ -58,12 +61,13 @@ fn advance(position: (usize, usize), board: &mut [Vec<char>]) -> (usize, usize) 
     let (x, y) = position;
     let len = board.len();
     let guard = board[x][y];
+    let barrier_chars = ['#', 'O'];
     match guard {
         '^' => {
             if x == 0 {
                 board[x][y] = 'X';
                 position
-            } else if board[x - 1][y] == '#' {
+            } else if barrier_chars.contains(&board[x - 1][y]) {
                 board[x][y] = '>';
                 position
             } else {
@@ -76,7 +80,7 @@ fn advance(position: (usize, usize), board: &mut [Vec<char>]) -> (usize, usize) 
             if y == len - 1 {
                 board[x][y] = 'X';
                 position
-            } else if board[x][y + 1] == '#' {
+            } else if barrier_chars.contains(&board[x][y + 1]) {
                 board[x][y] = 'v';
                 position
             } else {
@@ -89,7 +93,7 @@ fn advance(position: (usize, usize), board: &mut [Vec<char>]) -> (usize, usize) 
             if x == len - 1 {
                 board[x][y] = 'X';
                 position
-            } else if board[x + 1][y] == '#' {
+            } else if barrier_chars.contains(&board[x + 1][y]) {
                 board[x][y] = '<';
                 position
             } else {
@@ -102,7 +106,7 @@ fn advance(position: (usize, usize), board: &mut [Vec<char>]) -> (usize, usize) 
             if y == 0 {
                 board[x][y] = 'X';
                 position
-            } else if board[x][y - 1] == '#' {
+            } else if barrier_chars.contains(&board[x][y - 1]) {
                 board[x][y] = '^';
                 position
             } else {
@@ -131,9 +135,62 @@ fn find_guard(board: &[Vec<char>]) -> (usize, usize) {
     (0, 0)
 }
 
+fn part2(filename: String) -> usize {
+    let board = &mut read(filename);
+    let position = find_guard(board);
+    walk_free(position, board);
+    let (x, y) = position;
+    board[x][y] = '^';
+    let mut count = 0;
+    let mut i = 0;
+    for (x, row) in board.iter().enumerate() {
+        for (y, &tile) in row.iter().enumerate() {
+            if tile != 'X' {
+                continue;
+            }
+            i += 1;
+            eprint!("\r{i}");
+            let board1 = &mut board.clone();
+            board1[x][y] = 'O';
+            if is_loop(board1) {
+                count += 1;
+            }
+        }
+    }
+    dbg!(count);
+    count
+}
+
+fn is_loop(board: &mut Vec<Vec<char>>) -> bool {
+    let mut position = find_guard(board);
+    let (x, y) = position;
+    let mut guard = board[x][y];
+    let mut visited: HashMap<(usize, usize), Vec<char>> = HashMap::new();
+    visited.insert(position, vec![guard]);
+
+    loop {
+        position = advance(position, board);
+        if !on_board(position, board) {
+            return false;
+        }
+        let (x, y) = position;
+        guard = board[x][y];
+        if let Some(v) = visited.get_mut(&(x, y)) {
+            if v.contains(&guard) {
+                return true;
+            }
+            v.push(guard);
+        } else {
+            visited.insert(position, vec![guard]);
+        }
+        print_board(board);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::test;
 
     test!(p1, 6, 1, 1, 41);
+    test!(p2, 6, 2, 1, 6);
 }
