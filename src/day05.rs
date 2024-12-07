@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 
-use super::Args;
+use crate::Args;
+use crate::DEBUG;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
@@ -11,12 +12,10 @@ pub(crate) fn run(args: Args) -> usize {
     }
 }
 
-const DEBUG: bool = false;
-
 fn read(filename: String) -> (Vec<(usize, usize)>, Vec<Vec<usize>>) {
     let contents =
         std::fs::read_to_string(filename).expect("should have been able to read the file");
-    if DEBUG {
+    if *DEBUG {
         eprintln!("{contents}");
     }
 
@@ -73,13 +72,13 @@ fn is_ordered(update: &[usize], rules: &Vec<(usize, usize)>) -> bool {
 }
 
 fn debug_page(page: &usize) {
-    if DEBUG {
+    if *DEBUG {
         eprintln!("{page}")
     }
 }
 
 fn debug_update(update: &Vec<usize>) {
-    if DEBUG {
+    if *DEBUG {
         eprintln!("{update:?}")
     }
 }

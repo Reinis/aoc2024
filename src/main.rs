@@ -1,4 +1,5 @@
 use clap::Parser;
+use std::{env, sync::LazyLock};
 
 mod day01;
 mod day02;
@@ -17,6 +18,8 @@ struct Args {
     example: Option<u8>,
     #[arg(short, long, default_value_t = 1)]
     part: u8,
+    #[arg(long, default_value_t = false)]
+    debug: bool,
 }
 
 impl Args {
@@ -40,8 +43,25 @@ impl Args {
     }
 }
 
+const DEBUG_KEY: &str = "AOC_2024_DEBUG";
+
+static DEBUG: LazyLock<bool> = LazyLock::new(|| match env::var(DEBUG_KEY) {
+    Ok(val) => {
+        eprintln!("debug: {val:?}");
+        val == "on"
+    }
+    Err(e) => {
+        eprintln!("debug: error: {e}");
+        false
+    }
+});
+
 fn main() {
     let args = Args::parse();
+
+    unsafe {
+        env::set_var(DEBUG_KEY, if args.debug { "on" } else { "off" });
+    }
 
     match args.day {
         1 => day01::run(args),
@@ -64,6 +84,7 @@ macro_rules! test {
                 day: $day,
                 part: $part,
                 example: Some($example),
+                debug: false,
             };
             assert_eq!(super::run(args), $expected);
         }

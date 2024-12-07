@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use super::Args;
+use crate::Args;
+use crate::DEBUG;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
@@ -11,12 +12,10 @@ pub(crate) fn run(args: Args) -> usize {
     }
 }
 
-const DEBUG: bool = false;
-
 fn read(filename: String) -> Vec<Vec<char>> {
     let contents =
         std::fs::read_to_string(filename).expect("should have been able to read the file");
-    if DEBUG {
+    if *DEBUG {
         eprintln!("{contents}");
     }
 
@@ -48,7 +47,7 @@ fn walk_free(position: (usize, usize), board: &mut Vec<Vec<char>>) {
 }
 
 fn print_board(board: &Vec<Vec<char>>) {
-    if DEBUG {
+    if *DEBUG {
         let (x, y) = find_guard(board);
         eprintln!("({x},{y})");
         for row in board {

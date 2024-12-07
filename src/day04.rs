@@ -1,4 +1,5 @@
-use super::Args;
+use crate::Args;
+use crate::DEBUG;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
@@ -9,12 +10,10 @@ pub(crate) fn run(args: Args) -> usize {
     }
 }
 
-const DEBUG: bool = false;
-
 fn read(filename: String) -> Vec<Vec<char>> {
     let contents =
         std::fs::read_to_string(filename).expect("should have been able to read the file");
-    if DEBUG {
+    if *DEBUG {
         eprintln!("{contents}");
     }
 
@@ -72,13 +71,13 @@ fn diag(
                 .map(|(row, col)| if swap { (col, row) } else { (row, col) })
                 .map(|x| map_diag(x, len))
                 .inspect(|(row, col)| {
-                    if DEBUG {
+                    if *DEBUG {
                         eprintln!("({row},{col})")
                     }
                 })
                 .map(|(row, col)| board[row][col])
                 .collect();
-            if DEBUG {
+            if *DEBUG {
                 eprintln!("{}", line.iter().collect::<String>());
             }
             acc.push(line);
@@ -157,7 +156,7 @@ fn part2(filename: String) -> usize {
                     if a == b || c == d {
                         return 0;
                     }
-                    if DEBUG {
+                    if *DEBUG {
                         eprintln!("({row},{col})");
                     }
                     1

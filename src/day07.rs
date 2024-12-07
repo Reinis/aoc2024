@@ -1,4 +1,5 @@
-use super::Args;
+use crate::Args;
+use crate::DEBUG;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
@@ -9,12 +10,10 @@ pub(crate) fn run(args: Args) -> usize {
     }
 }
 
-const DEBUG: bool = false;
-
 fn read(filename: String) -> Vec<(usize, Vec<usize>)> {
     let contents =
         std::fs::read_to_string(filename).expect("should have been able to read the file");
-    if DEBUG {
+    if *DEBUG {
         eprintln!("{contents}");
     }
 
@@ -73,7 +72,7 @@ fn solve(value: usize, args: &[usize], opi: usize, op_count: usize) -> bool {
 }
 
 fn dbg_print(message: String) {
-    if DEBUG {
+    if *DEBUG {
         eprintln!("{message}")
     }
 }
