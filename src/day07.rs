@@ -1,5 +1,6 @@
 use crate::Args;
 use crate::DEBUG;
+use crate::ep;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
@@ -43,45 +44,47 @@ fn part1(filename: String, op_count: usize) -> usize {
 
 fn possibly_valid(equation: &(usize, Vec<usize>), op_count: usize) -> bool {
     let (value, args) = equation;
-    solve(*value, args, 0, op_count)
+    solve(*value, args[0], 1, args, 0, op_count)
 }
 
-fn solve(value: usize, args: &[usize], opi: usize, op_count: usize) -> bool {
+fn solve(value: usize, head: usize, k: usize, args: &[usize], opi: usize, op_count: usize) -> bool {
     if opi == op_count {
-        dbg_print(format!("Teriminating op {opi}: {value}: {args:?}"));
+        ep!("Teriminating op {opi}: {value}: {args:?}");
         return false;
     }
-    if args.len() == 1 {
-        dbg_print(format!(
+    if args.len() <= k {
+        ep!(
             "Teriminating value op {opi}: {value}: {args:?} {}",
-            if value == args[0] { "O" } else { "X" }
-        ));
-        return value == args[0];
+            if value == head { "O" } else { "X" }
+        );
+        return value == head;
+    }
+    if value < head {
+        return false;
     }
     for i in 0..op_count {
-        let first = op(args[0], args[1], i);
-        let args1 = &mut vec![first];
-        args1.extend(&args[2..]);
-        dbg_print(format!("Reducing {value}: {args:?} -> {args1:?}"));
+        let first = op(head, args[k], i);
+        ep!(
+            "Reducing {value}: {head} {:?} -> {first} {:?}",
+            &args[k..],
+            &args[k + 1..],
+        );
 
-        if solve(value, args1, i, op_count) {
+        if solve(value, first, k + 1, args, i, op_count) {
             return true;
         }
     }
     false
 }
 
-fn dbg_print(message: String) {
-    if *DEBUG {
-        eprintln!("{message}")
-    }
-}
-
 fn op(a: usize, b: usize, opi: usize) -> usize {
     match opi {
         0 => a + b,
         1 => a * b,
-        2 => format!("{a}{b}").parse().unwrap(),
+        2 => {
+            let n = b.checked_ilog10().unwrap_or(0) + 1;
+            a * 10usize.pow(n) + b
+        }
         _ => todo!(),
     }
 }
