@@ -38,7 +38,7 @@ fn part1(filename: String) -> usize {
     count
 }
 
-fn walk_free(position: (usize, usize), board: &mut Vec<Vec<char>>) {
+fn walk_free(position: (usize, usize), board: &mut [Vec<char>]) {
     let mut position = position;
     while on_board(position, board) {
         position = advance(position, board);
@@ -46,7 +46,7 @@ fn walk_free(position: (usize, usize), board: &mut Vec<Vec<char>>) {
     }
 }
 
-fn print_board(board: &Vec<Vec<char>>) {
+fn print_board(board: &[Vec<char>]) {
     if *DEBUG {
         let (x, y) = find_guard(board);
         eprintln!("({x},{y})");
@@ -138,10 +138,12 @@ fn part2(filename: String) -> usize {
     let board = &mut read(filename);
     let position = find_guard(board);
     walk_free(position, board);
-    let (x, y) = position;
-    board[x][y] = '^';
+    let (x0, y0) = position;
+    board[x0][y0] = '^';
+    let board1 = &mut board.clone();
     let mut count = 0;
     let mut i = 0;
+
     for (x, row) in board.iter().enumerate() {
         for (y, &tile) in row.iter().enumerate() {
             if tile != 'X' {
@@ -149,18 +151,19 @@ fn part2(filename: String) -> usize {
             }
             i += 1;
             eprint!("\r{i}");
-            let board1 = &mut board.clone();
             board1[x][y] = 'O';
             if is_loop(board1) {
                 count += 1;
             }
+            board1[x][y] = 'X';
+            board1[x0][y0] = '^';
         }
     }
     dbg!(count);
     count
 }
 
-fn is_loop(board: &mut Vec<Vec<char>>) -> bool {
+fn is_loop(board: &mut [Vec<char>]) -> bool {
     let mut position = find_guard(board);
     let (x, y) = position;
     let mut guard = board[x][y];
