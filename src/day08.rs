@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 use crate::Args;
 use crate::DEBUG;
@@ -11,6 +12,7 @@ pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
     match args.part {
         1 => part1(filename),
+        2 => part2(filename),
         _ => todo!(),
     }
 }
@@ -37,9 +39,17 @@ fn part1(filename: String) -> usize {
     count
 }
 
-fn antinodes(board: &Vec<Vec<char>>, get_nodes: impl Fn(&Pair) -> Vec<Point>) -> Vec<Point> {
+fn part2(filename: String) -> usize {
+    let board = read(filename);
+    let len = board.len();
+    let count = antinodes(&board, |pair| nodes2(pair, len)).len();
+    dbg!(count);
+    count
+}
+
+fn antinodes(board: &Vec<Vec<char>>, get_nodes: impl Fn(&Pair) -> Vec<Point>) -> HashSet<Point> {
     let antenas = antenas(board);
-    let mut antinodes = Vec::new();
+    let mut antinodes = HashSet::new();
 
     for (kind, coords) in antenas.iter() {
         let mut pairs = Vec::new();
@@ -53,14 +63,7 @@ fn antinodes(board: &Vec<Vec<char>>, get_nodes: impl Fn(&Pair) -> Vec<Point>) ->
                     continue;
                 }
                 pairs.push(pair);
-                for node in get_nodes(&pair) {
-                    if !antinodes.contains(&node) {
-                        antinodes.push(node);
-                        ep!("o -> ({},{})", node.0, node.1);
-                    } else {
-                        ep!("x -> ({},{})", node.0, node.1);
-                    }
-                }
+                antinodes.extend(get_nodes(&pair));
             }
         }
         ep!("{kind}: {pairs:?}");
@@ -69,7 +72,7 @@ fn antinodes(board: &Vec<Vec<char>>, get_nodes: impl Fn(&Pair) -> Vec<Point>) ->
     antinodes
 }
 
-fn print_board(board: &Vec<Vec<char>>, antinodes: &[Point]) {
+fn print_board(board: &Vec<Vec<char>>, antinodes: &HashSet<Point>) {
     if !*DEBUG {
         return;
     }
@@ -99,6 +102,36 @@ fn nodes(pair: &Pair, len: usize) -> Vec<Point> {
     let a2 = (x2 + dx, y2 + dy);
     let mut nodes = vec![a1, a2];
     nodes.retain(|&node| on_board(node, len));
+    for node in nodes.iter() {
+        ep!("o -> ({},{})", node.0, node.1);
+    }
+    nodes
+}
+
+fn nodes2(pair: &Pair, len: usize) -> Vec<Point> {
+    let ((x1, y1), (x2, y2)) = pair;
+    let dx = x2 - x1;
+    let dy = y2 - y1;
+    let mut n = 0;
+    let mut a1 = (x1 - dx * n, y1 - dy * n);
+    let mut a2 = (x2 + dx * n, y2 + dy * n);
+    let mut nodes = vec![];
+
+    while on_board(a1, len) {
+        nodes.push(a1);
+        ep!("o -> ({},{})", a1.0, a1.1);
+        n += 1;
+        a1 = (x1 - dx * n, y1 - dy * n);
+    }
+    n = 0;
+
+    while on_board(a2, len) {
+        nodes.push(a2);
+        ep!("o -> ({},{})", a2.0, a2.1);
+        n += 1;
+        a2 = (x2 + dx * n, y2 + dy * n);
+    }
+
     nodes
 }
 
@@ -129,4 +162,5 @@ mod tests {
     use crate::test;
 
     test!(p1, 8, 1, 1, 14);
+    test!(p2, 8, 2, 1, 34);
 }
