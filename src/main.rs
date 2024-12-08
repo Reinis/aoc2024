@@ -8,6 +8,7 @@ mod day04;
 mod day05;
 mod day06;
 mod day07;
+mod day08;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about=None)]
@@ -71,6 +72,7 @@ fn main() {
         5 => day05::run(args),
         6 => day06::run(args),
         7 => day07::run(args),
+        8 => day08::run(args),
         _ => todo!(),
     };
 }
