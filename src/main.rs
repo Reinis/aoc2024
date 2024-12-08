@@ -90,3 +90,17 @@ macro_rules! test {
         }
     };
 }
+
+#[macro_export]
+macro_rules! ep {
+    ($fmt:expr) => {
+        if *DEBUG {
+            eprintln!($fmt);
+        }
+    };
+    ($fmt:expr, $($p:expr),+ $(,)?) => {
+        if *DEBUG {
+            eprintln!($fmt, $($p),+);
+        }
+    };
+}
