@@ -6,6 +6,7 @@ pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
     match args.part {
         1 => part1(filename),
+        2 => part2(filename),
         _ => todo!(),
     }
 }
@@ -67,6 +68,95 @@ fn compact(disk_ids: &mut [String]) {
     }
 }
 
+fn part2(filename: String) -> usize {
+    let disk_map = read(filename);
+    let mut disk_ids = blocks(disk_map);
+    compact2(&mut disk_ids);
+    let checksum = disk_ids
+        .iter()
+        .fold((0, 0), |(acc, last), block| {
+            let next = if block.0 {
+                block.2 * (last..last + block.1).sum::<usize>()
+            } else {
+                0
+            };
+            (acc + next, last + block.1)
+        })
+        .0;
+    dbg!(checksum);
+    checksum
+}
+
+fn blocks(disk_map: Vec<usize>) -> Vec<(bool, usize, usize)> {
+    let mut id = 0;
+    disk_map
+        .iter()
+        .enumerate()
+        .map(|(i, &x)| {
+            if i % 2 == 0 {
+                let block = (true, x, id);
+                id += 1;
+                block
+            } else {
+                (false, x, 0)
+            }
+        })
+        .collect()
+}
+
+fn compact2(blocks: &mut Vec<(bool, usize, usize)>) {
+    let len = blocks.len();
+    ep!("{blocks:?} {len}");
+    print_mem(blocks);
+
+    for i in (0..len).rev() {
+        if !blocks[i].0 {
+            continue;
+        }
+        let size = blocks[i].1;
+        for j in 0..len - 1 {
+            if j >= i {
+                break;
+            }
+            if blocks[j].0 {
+                continue;
+            }
+            if blocks[j].1 < size {
+                continue;
+            }
+            if blocks[j].1 == size {
+                blocks[j] = blocks[i];
+                blocks[i] = (false, size, 0);
+                break;
+            }
+            let d = blocks[j].1 - size;
+            blocks[j] = blocks[i];
+            blocks[i] = (false, size, 0);
+            if i + 1 < blocks.len() && !blocks[i + 1].0 {
+                blocks[i].1 += blocks.remove(i + 1).1;
+            }
+            if !blocks[i - 1].0 {
+                blocks[i - 1].1 += blocks.remove(i).1;
+            }
+            blocks.insert(j + 1, (false, d, 0));
+            break;
+        }
+        print_mem(blocks);
+    }
+    ep!("{blocks:?} {}", blocks.len());
+}
+
+fn print_mem(blocks: &[(bool, usize, usize)]) {
+    if !*DEBUG {
+        return;
+    }
+    for (is_file, size, id) in blocks {
+        let char = if *is_file { &format!("{id}") } else { "." };
+        eprint!("{}", char.repeat(*size))
+    }
+    eprintln!();
+}
+
 fn expand(disk_map: Vec<usize>) -> Vec<String> {
     let mut result = Vec::new();
     let mut id = 0;
@@ -93,4 +183,5 @@ mod tests {
     use crate::test;
 
     test!(p1, 9, 1, 1, 1928);
+    test!(p2, 9, 2, 1, 2858);
 }
