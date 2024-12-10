@@ -7,7 +7,8 @@ use crate::ep;
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
     match args.part {
-        1 => part1(filename),
+        1 => part(filename, true),
+        2 => part(filename, false),
         _ => todo!(),
     }
 }
@@ -30,7 +31,7 @@ fn read(filename: String) -> Vec<Vec<usize>> {
         .collect()
 }
 
-fn part1(filename: String) -> usize {
+fn part(filename: String, unique: bool) -> usize {
     let board = &read(filename);
     let len = board.len();
     assert!(len == board[0].len());
@@ -42,22 +43,29 @@ fn part1(filename: String) -> usize {
         .map(|(i, _)| {
             let x = i / len;
             let y = i % len;
-            score(x, y, board)
+            score(x, y, board, unique)
         })
         .sum();
     dbg!(count);
     count
 }
 
-fn score(x: usize, y: usize, board: &[Vec<usize>]) -> usize {
+fn score(x: usize, y: usize, board: &[Vec<usize>], unique: bool) -> usize {
     ep!("check: ({x},{y}) -> {}", board[x][y]);
-    find_peaks(board, x, y, 0).len()
+    if unique {
+        find_peaks(board, x, y, 0)
+            .iter()
+            .collect::<HashSet<_>>()
+            .len()
+    } else {
+        find_peaks(board, x, y, 0).len()
+    }
 }
 
-fn find_peaks(board: &[Vec<usize>], x: usize, y: usize, step: usize) -> HashSet<(usize, usize)> {
+fn find_peaks(board: &[Vec<usize>], x: usize, y: usize, step: usize) -> Vec<(usize, usize)> {
     let p = board[x][y];
     if p == 9 {
-        return HashSet::from_iter([(x, y)]);
+        return vec![(x, y)];
     }
     let len = board.len();
     let end = len - 1;
@@ -74,7 +82,7 @@ fn find_peaks(board: &[Vec<usize>], x: usize, y: usize, step: usize) -> HashSet<
     if y < end {
         positions.push((x, y + 1));
     }
-    let mut peaks = HashSet::new();
+    let mut peaks = Vec::new();
     for (x, y) in positions.iter() {
         if board[*x][*y] != p + 1 {
             continue;
@@ -90,4 +98,5 @@ mod tests {
     use crate::test;
 
     test!(p1, 10, 1, 1, 36);
+    test!(p2, 10, 2, 1, 81);
 }
