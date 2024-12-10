@@ -6,9 +6,10 @@ use crate::ep;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
+    let board = &read(filename);
     match args.part {
-        1 => part(filename, true),
-        2 => part(filename, false),
+        1 => part1(board),
+        2 => part2(board),
         _ => todo!(),
     }
 }
@@ -31,10 +32,16 @@ fn read(filename: String) -> Vec<Vec<usize>> {
         .collect()
 }
 
-fn part(filename: String, unique: bool) -> usize {
-    let board = &read(filename);
+fn part1(board: &[Vec<usize>]) -> usize {
+    part(board, true)
+}
+
+fn part2(board: &[Vec<usize>]) -> usize {
+    part(board, false)
+}
+
+fn part(board: &[Vec<usize>], unique: bool) -> usize {
     let len = board.len();
-    assert!(len == board[0].len());
     let count: usize = board
         .iter()
         .flatten()
@@ -95,8 +102,14 @@ fn find_peaks(board: &[Vec<usize>], x: usize, y: usize, step: usize) -> Vec<(usi
 
 #[cfg(test)]
 mod tests {
+    use crate::bench;
     use crate::test;
 
     test!(p1, 10, 1, 1, 36);
     test!(p2, 10, 2, 1, 81);
+
+    bench!(b1e, 10, 1, Some(1));
+    bench!(b1i, 10, 1, None);
+    bench!(b2e, 10, 2, Some(1));
+    bench!(b2i, 10, 2, None);
 }

@@ -10,9 +10,10 @@ type Pair = (Point, Point);
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
+    let board = &read(filename);
     match args.part {
-        1 => part1(filename),
-        2 => part2(filename),
+        1 => part1(board),
+        2 => part2(board),
         _ => todo!(),
     }
 }
@@ -31,23 +32,21 @@ fn read(filename: String) -> Vec<Vec<char>> {
         .collect()
 }
 
-fn part1(filename: String) -> usize {
-    let board = read(filename);
+fn part1(board: &[Vec<char>]) -> usize {
     let len = board.len();
-    let count = antinodes(&board, |pair| nodes(pair, len)).len();
+    let count = antinodes(board, |pair| nodes(pair, len)).len();
     dbg!(count);
     count
 }
 
-fn part2(filename: String) -> usize {
-    let board = read(filename);
+fn part2(board: &[Vec<char>]) -> usize {
     let len = board.len();
-    let count = antinodes(&board, |pair| nodes2(pair, len)).len();
+    let count = antinodes(board, |pair| nodes2(pair, len)).len();
     dbg!(count);
     count
 }
 
-fn antinodes(board: &Vec<Vec<char>>, get_nodes: impl Fn(&Pair) -> Vec<Point>) -> HashSet<Point> {
+fn antinodes(board: &[Vec<char>], get_nodes: impl Fn(&Pair) -> Vec<Point>) -> HashSet<Point> {
     let antenas = antenas(board);
     let mut antinodes = HashSet::new();
 
@@ -72,7 +71,7 @@ fn antinodes(board: &Vec<Vec<char>>, get_nodes: impl Fn(&Pair) -> Vec<Point>) ->
     antinodes
 }
 
-fn print_board(board: &Vec<Vec<char>>, antinodes: &HashSet<Point>) {
+fn print_board(board: &[Vec<char>], antinodes: &HashSet<Point>) {
     if !*DEBUG {
         return;
     }
@@ -159,8 +158,14 @@ fn antenas(board: &[Vec<char>]) -> HashMap<char, Vec<Point>> {
 
 #[cfg(test)]
 mod tests {
+    use crate::bench;
     use crate::test;
 
     test!(p1, 8, 1, 1, 14);
     test!(p2, 8, 2, 1, 34);
+
+    bench!(b1e, 8, 1, Some(1));
+    bench!(b1i, 8, 1, None);
+    bench!(b2e, 8, 2, Some(1));
+    bench!(b2i, 8, 2, None);
 }

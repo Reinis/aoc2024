@@ -5,9 +5,10 @@ use crate::DEBUG;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
+    let board = &read(filename);
     match args.part {
-        1 => part1(filename),
-        2 => part2(filename),
+        1 => part1(board),
+        2 => part2(board),
         _ => todo!(),
     }
 }
@@ -26,11 +27,11 @@ fn read(filename: String) -> Vec<Vec<char>> {
         .collect()
 }
 
-fn part1(filename: String) -> usize {
-    let board = &mut read(filename);
+fn part1(board: &[Vec<char>]) -> usize {
+    let board1 = &mut board.to_owned();
     let position = find_guard(board);
-    walk_free(position, board);
-    let count = board
+    walk_free(position, board1);
+    let count = board1
         .iter()
         .map(|row| row.iter().filter(|&x| *x == 'X').count())
         .sum();
@@ -134,17 +135,17 @@ fn find_guard(board: &[Vec<char>]) -> (usize, usize) {
     (0, 0)
 }
 
-fn part2(filename: String) -> usize {
-    let board = &mut read(filename);
-    let position = find_guard(board);
-    walk_free(position, board);
+fn part2(board: &[Vec<char>]) -> usize {
+    let board0 = &mut board.to_owned();
+    let position = find_guard(board0);
+    walk_free(position, board0);
     let (x0, y0) = position;
-    board[x0][y0] = '^';
-    let board1 = &mut board.clone();
+    board0[x0][y0] = '^';
+    let board1 = &mut board.to_owned();
     let mut count = 0;
     let mut i = 0;
 
-    for (x, row) in board.iter().enumerate() {
+    for (x, row) in board0.iter().enumerate() {
         for (y, &tile) in row.iter().enumerate() {
             if tile != 'X' {
                 continue;
@@ -191,8 +192,14 @@ fn is_loop(board: &mut [Vec<char>]) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use crate::bench;
     use crate::test;
 
     test!(p1, 6, 1, 1, 41);
     test!(p2, 6, 2, 1, 6);
+
+    bench!(b1e, 6, 1, Some(1));
+    bench!(b1i, 6, 1, None);
+    bench!(b2e, 6, 2, Some(1));
+    bench!(b2i, 6, 2, None);
 }

@@ -1,5 +1,8 @@
+#![feature(test)]
 use clap::Parser;
 use std::{env, sync::LazyLock};
+
+extern crate test;
 
 mod day01;
 mod day02;
@@ -107,6 +110,28 @@ macro_rules! ep {
     ($fmt:expr, $($p:expr),+ $(,)?) => {
         if *DEBUG {
             eprintln!($fmt, $($p),+);
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! bench {
+    ($func:ident, $day:expr, $part:expr, $example:expr) => {
+        #[bench]
+        fn $func(b: &mut test::Bencher) {
+            let args = $crate::Args {
+                day: $day,
+                part: $part,
+                example: $example,
+                debug: false,
+            };
+            let input = super::read(args.filename());
+
+            if args.part == 1 {
+                b.iter(|| super::part1(&input))
+            } else {
+                b.iter(|| super::part2(&input))
+            }
         }
     };
 }

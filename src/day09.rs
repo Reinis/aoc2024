@@ -4,9 +4,10 @@ use crate::ep;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
+    let disk_map = &read(filename);
     match args.part {
-        1 => part1(filename),
-        2 => part2(filename),
+        1 => part1(disk_map),
+        2 => part2(disk_map),
         _ => todo!(),
     }
 }
@@ -25,8 +26,7 @@ fn read(filename: String) -> Vec<usize> {
         .collect()
 }
 
-fn part1(filename: String) -> usize {
-    let disk_map = read(filename);
+fn part1(disk_map: &[usize]) -> usize {
     let mut disk_ids = expand(disk_map);
     compact(&mut disk_ids);
     let checksum = disk_ids
@@ -68,8 +68,7 @@ fn compact(disk_ids: &mut [String]) {
     }
 }
 
-fn part2(filename: String) -> usize {
-    let disk_map = read(filename);
+fn part2(disk_map: &[usize]) -> usize {
     let mut disk_ids = blocks(disk_map);
     compact2(&mut disk_ids);
     let checksum = disk_ids
@@ -87,7 +86,7 @@ fn part2(filename: String) -> usize {
     checksum
 }
 
-fn blocks(disk_map: Vec<usize>) -> Vec<(bool, usize, usize)> {
+fn blocks(disk_map: &[usize]) -> Vec<(bool, usize, usize)> {
     let mut id = 0;
     disk_map
         .iter()
@@ -157,7 +156,7 @@ fn print_mem(blocks: &[(bool, usize, usize)]) {
     eprintln!();
 }
 
-fn expand(disk_map: Vec<usize>) -> Vec<String> {
+fn expand(disk_map: &[usize]) -> Vec<String> {
     let mut result = Vec::new();
     let mut id = 0;
 
@@ -180,8 +179,12 @@ fn expand(disk_map: Vec<usize>) -> Vec<String> {
 
 #[cfg(test)]
 mod tests {
+    use crate::bench;
     use crate::test;
 
     test!(p1, 9, 1, 1, 1928);
     test!(p2, 9, 2, 1, 2858);
+
+    bench!(b1e, 9, 1, Some(1));
+    bench!(b2e, 9, 2, Some(1));
 }

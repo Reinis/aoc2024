@@ -3,9 +3,10 @@ use crate::DEBUG;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
+    let board = &read(filename);
     match args.part {
-        1 => part1(filename),
-        2 => part2(filename),
+        1 => part1(board),
+        2 => part2(board),
         _ => todo!(),
     }
 }
@@ -24,9 +25,8 @@ fn read(filename: String) -> Vec<Vec<char>> {
         .collect()
 }
 
-fn part1(filename: String) -> usize {
+fn part1(board: &[Vec<char>]) -> usize {
     let word: Vec<char> = "XMAS".chars().collect();
-    let board = read(filename);
     let len = board.len();
     assert!(len == board[0].len());
     // dbg!(&map, &map[0], &map[0][0]);
@@ -35,15 +35,15 @@ fn part1(filename: String) -> usize {
         .map(count_words(&word))
         // .inspect(|x| eprintln!("{x}"))
         .sum();
-    count += transpose(&board)
+    count += transpose(board)
         .iter()
         .map(count_words(&word))
         .sum::<usize>();
-    count += diag(&board, map_diag1)
+    count += diag(board, map_diag1)
         .iter()
         .map(count_words(&word))
         .sum::<usize>();
-    count += diag(&board, map_diag2)
+    count += diag(board, map_diag2)
         .iter()
         .map(count_words(&word))
         .sum::<usize>();
@@ -133,8 +133,7 @@ fn count_words(word: &[char]) -> impl FnMut(&Vec<char>) -> usize {
     }
 }
 
-fn part2(filename: String) -> usize {
-    let board = read(filename);
+fn part2(board: &[Vec<char>]) -> usize {
     let len = board.len();
     let count = (1..len - 1)
         .map(|row| {
@@ -170,8 +169,14 @@ fn part2(filename: String) -> usize {
 
 #[cfg(test)]
 mod tests {
+    use crate::bench;
     use crate::test;
 
     test!(p1, 4, 1, 1, 18);
     test!(p2, 4, 2, 1, 9);
+
+    bench!(b1e, 4, 1, Some(1));
+    bench!(b1i, 4, 1, None);
+    bench!(b2e, 4, 2, Some(1));
+    bench!(b2i, 4, 2, None);
 }

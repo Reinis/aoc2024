@@ -4,9 +4,10 @@ use crate::ep;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
+    let equations = &read(filename);
     match args.part {
-        1 => part1(filename, 2),
-        2 => part1(filename, 3),
+        1 => part1(equations),
+        2 => part2(equations),
         _ => todo!(),
     }
 }
@@ -31,8 +32,17 @@ fn read(filename: String) -> Vec<(usize, Vec<usize>)> {
         .collect()
 }
 
-fn part1(filename: String, op_count: usize) -> usize {
-    let equations = read(filename);
+fn part1(equations: &[(usize, Vec<usize>)]) -> usize {
+    let op_count = 2;
+    part(equations, op_count)
+}
+
+fn part2(equations: &[(usize, Vec<usize>)]) -> usize {
+    let op_count = 3;
+    part(equations, op_count)
+}
+
+fn part(equations: &[(usize, Vec<usize>)], op_count: usize) -> usize {
     let result = equations
         .iter()
         .filter(|&equation| possibly_valid(equation, op_count))
@@ -91,8 +101,14 @@ fn op(a: usize, b: usize, opi: usize) -> usize {
 
 #[cfg(test)]
 mod tests {
+    use crate::bench;
     use crate::test;
 
     test!(p1, 7, 1, 1, 3749);
     test!(p2, 7, 2, 1, 11387);
+
+    bench!(b1e, 7, 1, Some(1));
+    bench!(b1i, 7, 1, None);
+    bench!(b2e, 7, 2, Some(1));
+    bench!(b2i, 7, 2, None);
 }

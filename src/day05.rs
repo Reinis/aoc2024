@@ -5,9 +5,10 @@ use crate::DEBUG;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
+    let changes = &read(filename);
     match args.part {
-        1 => part1(filename),
-        2 => part2(filename),
+        1 => part1(changes),
+        2 => part2(changes),
         _ => todo!(),
     }
 }
@@ -42,11 +43,11 @@ fn read(filename: String) -> (Vec<(usize, usize)>, Vec<Vec<usize>>) {
     (rules, updates)
 }
 
-fn part1(filename: String) -> usize {
-    let (rules, updates) = read(filename);
+fn part1(changes: &(Vec<(usize, usize)>, Vec<Vec<usize>>)) -> usize {
+    let (rules, updates) = changes;
     let count = updates
         .iter()
-        .filter(|update| is_ordered(update, &rules))
+        .filter(|update| is_ordered(update, rules))
         .inspect(|x| debug_update(x))
         .map(|update| get_mid(update))
         .inspect(debug_page)
@@ -83,13 +84,13 @@ fn debug_update(update: &Vec<usize>) {
     }
 }
 
-fn part2(filename: String) -> usize {
-    let (rules, updates) = read(filename);
+fn part2(changes: &(Vec<(usize, usize)>, Vec<Vec<usize>>)) -> usize {
+    let (rules, updates) = changes;
     let count = updates
         .iter()
-        .filter(|update| !is_ordered(update, &rules))
+        .filter(|update| !is_ordered(update, rules))
         .inspect(|x| debug_update(x))
-        .map(|update| order(update, &rules))
+        .map(|update| order(update, rules))
         .inspect(debug_update)
         .map(|update| get_mid(&update))
         .inspect(debug_page)
@@ -114,8 +115,14 @@ fn order(update: &[usize], rules: &[(usize, usize)]) -> Vec<usize> {
 
 #[cfg(test)]
 mod tests {
+    use crate::bench;
     use crate::test;
 
     test!(p1, 5, 1, 1, 143);
     test!(p2, 5, 2, 1, 123);
+
+    bench!(b1e, 5, 1, Some(1));
+    bench!(b1i, 5, 1, None);
+    bench!(b2e, 5, 2, Some(1));
+    bench!(b2i, 5, 2, None);
 }

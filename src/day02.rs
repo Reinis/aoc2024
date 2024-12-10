@@ -1,10 +1,12 @@
-use super::Args;
+use crate::Args;
+use crate::DEBUG;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
+    let reports = &read(filename);
     match args.part {
-        1 => part1(filename),
-        2 => part2(filename),
+        1 => part1(reports),
+        2 => part2(reports),
         _ => todo!(),
     }
 }
@@ -12,7 +14,9 @@ pub(crate) fn run(args: Args) -> usize {
 fn read(filename: String) -> Vec<Vec<i8>> {
     let contents =
         std::fs::read_to_string(filename).expect("should have been able to read the file");
-    // eprintln!("{contents}");
+    if *DEBUG {
+        eprintln!("{contents}");
+    }
 
     contents
         .lines()
@@ -20,8 +24,7 @@ fn read(filename: String) -> Vec<Vec<i8>> {
         .collect()
 }
 
-fn part1(filename: String) -> usize {
-    let reports = read(filename);
+fn part1(reports: &[Vec<i8>]) -> usize {
     let safe = reports.iter().filter(|x| is_safe(x)).count();
     dbg!(safe);
     safe
@@ -45,8 +48,7 @@ fn is_safe(report: &[i8]) -> bool {
     true
 }
 
-fn part2(filename: String) -> usize {
-    let reports = read(filename);
+fn part2(reports: &[Vec<i8>]) -> usize {
     let safe = reports.iter().filter(|x| is_tolerable(x)).count();
     dbg!(safe);
     safe
@@ -69,8 +71,14 @@ fn is_tolerable(report: &[i8]) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use crate::bench;
     use crate::test;
 
     test!(p1, 2, 1, 1, 2);
     test!(p2, 2, 2, 1, 4);
+
+    bench!(b1e, 2, 1, Some(1));
+    bench!(b1i, 2, 1, None);
+    bench!(b2e, 2, 2, Some(1));
+    bench!(b2i, 2, 2, None);
 }
