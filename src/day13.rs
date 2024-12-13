@@ -9,11 +9,12 @@ pub(crate) fn run(args: Args) -> usize {
     let machines = &read(filename);
     match args.part {
         1 => part1(machines),
+        2 => part2(machines),
         _ => todo!(),
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 struct Button {
     x: f64,
     y: f64,
@@ -36,10 +37,17 @@ impl FromStr for Button {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 struct Prize {
     x: f64,
     y: f64,
+}
+
+impl Prize {
+    fn add(&mut self, f: f64) {
+        self.x += f;
+        self.y += f;
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -80,6 +88,19 @@ fn read(filename: String) -> Vec<(Button, Button, Prize)> {
 }
 
 fn part1(machines: &[(Button, Button, Prize)]) -> usize {
+    part(machines)
+}
+
+fn part2(machines: &[(Button, Button, Prize)]) -> usize {
+    let f = 10_000_000_000_000.0;
+    let machines = &mut machines.to_owned();
+    machines.iter_mut().for_each(|(_, _, p)| {
+        p.add(f);
+    });
+    part(machines)
+}
+
+fn part(machines: &[(Button, Button, Prize)]) -> usize {
     let cost = machines
         .iter()
         .filter_map(|(a, b, p)| solve(a, b, p))
@@ -115,7 +136,12 @@ fn solve(a: &Button, b: &Button, p: &Prize) -> Option<(usize, usize)> {
 
 #[cfg(test)]
 mod tests {
+    use crate::bench;
     use crate::test;
 
     test!(p1, 13, 1, 1, 480);
+
+    bench!(b1e, 13, 1, Some(1));
+    bench!(b1i, 13, 1, None);
+    bench!(b2i, 13, 2, None);
 }
