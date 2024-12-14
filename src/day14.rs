@@ -1,13 +1,18 @@
+use core::time::Duration;
 use std::str::FromStr;
+use std::thread::sleep;
 
 use crate::Args;
 use crate::DEBUG;
+use crate::ep;
 
 pub(crate) fn run(args: Args) -> usize {
     let filename = args.filename();
     let robots = &read(filename);
     match args.part {
         1 => part1(robots),
+        2 => part2(robots),
+        3 => part3(robots),
         _ => todo!(),
     }
 }
@@ -113,6 +118,47 @@ fn quadrant_populations(robots: &[Robot], dx: i64, dy: i64) -> [usize; 4] {
     [q1, q2, q3, q4]
 }
 
+fn part2(robots: &[Robot]) -> usize {
+    let robots = &mut robots.to_owned();
+    let dx = 101;
+    let dy = 103;
+    let dt = 1;
+    let end = dx * dy;
+    let mut step = 0;
+    let mut maxd = 0;
+
+    for t1 in 1..=end {
+        evolve(robots, dx, dy, dt);
+        let populations = quadrant_populations(robots, dx, dy);
+        let d = populations.iter().max().unwrap() - populations.iter().min().unwrap();
+        if d > maxd {
+            step = t1;
+            maxd = d;
+        }
+        ep!("{}: {:?}", t1, populations);
+    }
+    dbg!(step);
+    step as usize
+}
+
+fn part3(robots: &[Robot]) -> usize {
+    let robots = &mut robots.to_owned();
+    let dx = 101;
+    let dy = 103;
+    let dt = 1;
+    let t0 = 7_300;
+    evolve(robots, dx, dy, t0);
+    print_robots(robots, dx, dy);
+
+    for t1 in 1..=100 {
+        evolve(robots, dx, dy, dt);
+        ep!("{}", t0 + t1);
+        print_robots(robots, dx, dy);
+        sleep(Duration::from_millis(150));
+    }
+    0
+}
+
 fn evolve(robots: &mut Vec<Robot>, dx: i64, dy: i64, time: i64) {
     for robot in robots {
         robot.0.x += time * robot.1.x;
@@ -149,7 +195,12 @@ fn print_robots(robots: &Vec<Robot>, dx: i64, dy: i64) {
 
 #[cfg(test)]
 mod tests {
+    use crate::bench0;
     use crate::test;
 
     test!(p1, 14, 1, 1, 12);
+
+    bench0!(b1e1, part1, 14, 1, 1);
+    bench0!(b1i, part1, 14, 1, 0);
+    bench0!(b2i, part2, 14, 2, 0);
 }
