@@ -141,3 +141,22 @@ macro_rules! bench {
         }
     };
 }
+
+#[macro_export]
+macro_rules! bench0 {
+    ($func:ident, $run:ident, $day:expr, $part:expr, $example:expr) => {
+        #[bench]
+        fn $func(b: &mut test::Bencher) {
+            let example = if $example == 0 { None } else { Some($example) };
+            let args = $crate::Args {
+                day: $day,
+                part: $part,
+                example,
+                debug: false,
+            };
+            let input = super::read(args.filename());
+
+            b.iter(|| super::$run(&input));
+        }
+    };
+}
